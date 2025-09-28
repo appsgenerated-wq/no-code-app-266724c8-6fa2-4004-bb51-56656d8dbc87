@@ -1,0 +1,94 @@
+name: MonkeyTracker
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - name
+      - name: email
+        type: email
+      - name: role
+        type: choice
+        options:
+          values: [admin, researcher]
+        default: researcher
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: restricted
+          allow: User
+          condition: self
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: admin
+      signup:
+        - access: public
+
+  Troop:
+    properties:
+      - name: name
+        type: string
+      - name: location
+        type: text
+        helpText: General location where the troop is found.
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: public
+      update:
+        - access: admin
+      delete:
+        - access: admin
+
+  Monkey:
+    properties:
+      - name: name
+        type: string
+      - name: species
+        type: choice
+        options:
+          values: [Chimpanzee, Gorilla, Orangutan, Gibbon, Macaque, Baboon, Howler]
+      - name: age
+        type: number
+        helpText: Estimated age in years.
+      - name: notes
+        type: richText
+      - name: photo
+        type: image
+        options:
+          sizes:
+            thumbnail:
+              width: 200
+              height: 200
+    belongsTo:
+      - { name: owner, entity: User }
+      - { name: troop, entity: Troop }
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: public
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: restricted
+          allow: User
+          condition: self
+
+
+# Health check endpoint for connection testing
+endpoints:
+  health:
+    path: /api/health
+    method: GET
+    policies: []
+    handler: healthCheck
